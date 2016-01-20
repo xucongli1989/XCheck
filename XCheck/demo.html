@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <script src="jquery-1.11.3.min.js" type="text/javascript"></script>
+    <script src="XCheck.js" type="text/javascript"></script>
+</head>
+
+<body>
+
+
+
+    <table>
+
+        <tr>
+            <td>
+                全选<input type="checkbox" class="xcheckgroup checkAll" /> <br/>
+                <input type="button" class="xcheckgroup reverseCheck" value="反选" /> <br/>
+                <input type="button" class="xcheckgroup clearCheck" value="清空" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" />
+
+            </td>
+
+        </tr>
+    </table>
+
+
+    <script type="text/javascript">
+        $(function(){
+    
+            $.XCheck({
+                groupClass:".xcheckgroup"
+            });
+    
+        });
+    </script>
+
+
+
+
+
+</body>
+
+</html>
