@@ -6,6 +6,7 @@
  * 电子邮件：80213876@qq.com
  ********************************************************************************************
  * 2：使用说明：
+ *                      本插件支持单页及多页的全选、反选、清空选择
  *                      需要引用jquery，$.XCheck({option});
  ********************************************************************************************
  * 当前版本：v1.0.0
@@ -18,65 +19,103 @@
      */
     var defaults = {
         /**
-         * 是否在ajax多页选择时保持选择状态
+         * 是否为【多页选择】的场景（比如ajax翻页）
          */
-        isHoldCheckState: false,
+        isMultiple: false,
         /**
-         * 组的class
+         * 【组】的class
          */
         groupClass: ".xcheckgroup",
         /**
-         * 要选择的每一项的class
+         * 【要选择的每一项】的class
          */
         checkItemClass: ".checkItem",
         /**
-         * 全选的class
+         * 【全选所有】的class
          */
         checkAllClass: ".checkAll",
         /**
-         * 清空选择的class
+         * 【全选当页】的class
+         */
+        checkAllCurrentClass:".checkAllCurrent",
+        /**
+         * 【清空所有选择】的class
          */
         clearCheckClass: ".clearCheck",
         /**
-         * 反选的class
+         * 【清空当页选择】的class
          */
-        reverseCheckClass: ".reverseCheck",
+        clearCheckCurrentClass:".clearCheckCurrent",
         /**
-         * 存放已选值的class
+         * 【反选当页】的class
+         */
+        reverseCheckCurrentClass: ".reverseCheckCurrent",
+        /**
+         * 【存放已选值】的class
          */
         valueClass: ".checkAll",
+        
+        
         /**
-         * 全选前回调函数，如果返回false，则不执行默认的全选事件
+         * 【全选所有】前回调函数，如果返回false，则不执行默认的【全选所有】的事件
          */
         beforeCheckAll: function () { },
         /**
-         * 全选后回调函数
+         * 【全选所有】后的回调函数
          */
         afterCheckAll: function () { },
+        
+        
         /**
-         * 选择具体项前回调函数，如果返回false，则不执行默认的选择具体项的事件
+         * 【全选当页】前的回调函数，如果返回false，则不执行默认的【全选当页】事件
+         */
+        beforeCheckAllCurrent: function () { },
+        /**
+         * 【全选当页】后的回调函数
+         */
+        afterCheckAllCurrent: function () { },        
+        
+        
+        /**
+         * 【选择具体项】前回调函数，如果返回false，则不执行默认的【选择具体项】的事件
          */
         beforeCheckItem: function () { },
         /**
-         * 选择具体项后回调函数
+         * 【选择具体项】后回调函数
          */
         afterCheckItem: function () { },
+        
+        
         /**
-         * 清空选择前回调函数，如果返回false，则不执行默认的清空选择事件
+         * 【清空选择所有】之前的回调函数，如果返回false，则不执行默认的【清空选择所有】的事件
          */
         beforeClearCheck: function () { },
         /**
-         * 清空选择后回调函数
+         * 【清空选择所有】之后的回调函数
          */
         afterClearCheck: function () { },
+        
+        
         /**
-         * 反选前回调函数，如果返回false，则不执行默认的反选事件
+         * 【清空选择当前页】之前的回调函数，如果返回false，则不执行默认的【清空选择当前页】的事件
          */
-        beforeReverseCheck: function () { },
+        beforeClearCheckCurrent: function () { },
         /**
-         * 反选后回调函数
+         * 【清空选择当前页】之后的回调函数
          */
-        afterReverseCheck: function () { }
+        afterClearCheckCurrent: function () { },
+        
+        
+        
+        
+        /**
+         * 【反选当页】前的回调函数，如果返回false，则不执行默认的【反选当页】事件
+         */
+        beforeReverseCheckCurrent: function () { },
+        /**
+         * 【反选当页】后的回调函数
+         */
+        afterReverseCheckCurrent: function () { }
     };
     
     /**
@@ -150,27 +189,31 @@
          */
         var _isAllChecked = function () {
             var $checkItem = $(ops.checkItemClass);
-            return $checkItem.not(":checked").length === 0;
+
+            if (ops.isMultiple) {
+                return selectInfo.isCheckAll && selectInfo.unSelectedValues.length === 0;
+            } else {
+                return $checkItem.not(":checked").length === 0;
+            }
+
         };
 
         /**
-         * 获取选择的结果值
+         * 获取选择的结果值（如果是多页情况，则返回选择的SelectedBaseInfo对象；否则，直接返回已选项的值）
          */
         var _getValues = function () {
             var val = $(ops.valueClass).attr("value");
-            return ops.isHoldCheckState ? JSON.parse(val || "{}") : val;
+            return ops.isMultiple ? JSON.parse(val || "{}") : val;
         };
         /**
-         * 设置选择的结果值
+         * 设置选择的结果值（values可为【SelectedBaseInfo】对象/数组/字符串）
          */
         var _setValues = function (values) {
 
             var $val = $(ops.valueClass);
-            if (ops.isHoldCheckState && isObject(values)) {
-                $val.attr("value", JSON.stringify(selectInfo));
-            } else if (isString(values)) {
-                $val.attr("value", values);
-            } else if (isArray(values)) {
+            if (ops.isMultiple && isObject(values)) {
+                $val.attr("value", JSON.stringify(values));
+            } else {
                 $val.attr("value", values.toString());
             }
 
