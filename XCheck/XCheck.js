@@ -19,9 +19,9 @@
      */
     var defaults = {
         /**
-         * 是否为【多页选择】的场景（比如ajax翻页）
+         * 是否为【保持选择】的场景（比如ajax翻页多选）
          */
-        isMultiple: false,
+        isKeep: false,
         /**
          * 【组】的class
          */
@@ -37,7 +37,7 @@
         /**
          * 【全选当页】的class
          */
-        checkAllCurrentClass:".checkAllCurrent",
+        checkAllCurrentClass: ".checkAllCurrent",
         /**
          * 【清空所有选择】的class
          */
@@ -45,7 +45,7 @@
         /**
          * 【清空当页选择】的class
          */
-        clearCheckCurrentClass:".clearCheckCurrent",
+        clearCheckCurrentClass: ".clearCheckCurrent",
         /**
          * 【反选当页】的class
          */
@@ -54,6 +54,10 @@
          * 【存放已选值】的class
          */
         valueClass: ".checkAll",
+        /**
+         * 【存放已选值】的属性
+         */
+        valueAttr: "value",
         
         
         /**
@@ -176,49 +180,56 @@
         ops = $.extend({}, defaults, ops || {});
         ops.checkItemClass += ops.groupClass;
         ops.checkAllClass += ops.groupClass;
+        ops.checkAllCurrentClass += ops.groupClass;
         ops.clearCheckClass += ops.groupClass;
-        ops.reverseCheckClass += ops.groupClass;
+        ops.clearCheckCurrentClass += ops.groupClass;
+        ops.reverseCheckCurrentClass += ops.groupClass;
         ops.valueClass += ops.groupClass;
 
         var $body = $("body");
 
         var selectInfo = new SelectedBaseInfo();
+        
+        
+        //获取所有【要选择的每一项】的jquery对象
+        var _getCheckItem = function () {
+            return $(ops.checkItemClass);
+        };
+        //获取所有【全选所有】的jquery对象
+        var _getCheckAll = function () {
+            return $(ops.checkAllClass);
+        };
+        //获取所有【全选当页】的jquery对象
+        var _getCheckAllCurrent = function () {
+            return $(ops.checkAllCurrentClass);
+        };
+        //获取或设置已选结果值
+        var _getOrSetValue = function (v) {
+            var $val = $(ops.valueClass);
+            if (!v) {
+                return ops.isKeep ? JSON.parse($val.attr(ops.valueAttr) || "{}") : $val.attr(ops.valueAttr);
+            }
+            if (ops.isKeep && isObject(v)) {
+                $val.attr(ops.valueAttr, JSON.stringify(v));
+            } else {
+                $val.attr(ops.valueAttr, v);
+            }
+        };
+        
+        
 
         /**
          * 判断是否全选了
          */
         var _isAllChecked = function () {
-            var $checkItem = $(ops.checkItemClass);
 
-            if (ops.isMultiple) {
+            if (ops.isKeep) {
                 return selectInfo.isCheckAll && selectInfo.unSelectedValues.length === 0;
             } else {
-                return $checkItem.not(":checked").length === 0;
+                return _getCheckItem().not(":checked").length === 0;
             }
 
         };
-
-        /**
-         * 获取选择的结果值（如果是多页情况，则返回选择的SelectedBaseInfo对象；否则，直接返回已选项的值）
-         */
-        var _getValues = function () {
-            var val = $(ops.valueClass).attr("value");
-            return ops.isMultiple ? JSON.parse(val || "{}") : val;
-        };
-        /**
-         * 设置选择的结果值（values可为【SelectedBaseInfo】对象/数组/字符串）
-         */
-        var _setValues = function (values) {
-
-            var $val = $(ops.valueClass);
-            if (ops.isMultiple && isObject(values)) {
-                $val.attr("value", JSON.stringify(values));
-            } else {
-                $val.attr("value", values.toString());
-            }
-
-        };
-        
 
         /**
          * 全选事件
