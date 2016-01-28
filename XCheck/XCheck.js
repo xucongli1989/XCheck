@@ -207,7 +207,7 @@
         var _getOrSetValue = function (v) {
             var $val = $(ops.valueClass);
             if (!v) {
-                return ops.isKeep ? JSON.parse($val.attr(ops.valueAttr) || "{}") : $val.attr(ops.valueAttr);
+                return ops.isKeep ? JSON.parse($val.attr(ops.valueAttr) || null) : $val.attr(ops.valueAttr);
             }
             if (ops.isKeep && isObject(v)) {
                 $val.attr(ops.valueAttr, JSON.stringify(v));
@@ -230,55 +230,132 @@
             }
 
         };
+        
+        
+        /****************************************事件处理  begin******************************************/
 
         /**
-         * 全选事件
+         * 保存选中值到最终的结果中
          */
-        var _checkAll = function () {
-            var $checkItem = $(ops.checkItemClass);
-            var _t = this;
-
-            if (isCheckBox(_t)) {
-                $checkItem.prop({ "checked": _t.checked });
-            } else {
-                $checkItem.prop({ "checked": true });
+        var _pushVal = function (obj) {
+            if (!ops.isKeep) {
+                return;
             }
-            _setValues();
+            var ischecked = obj.checked, v = obj.value;
+            
+            //【全选所有】时
+            if (selectInfo.isCheckAll) {
+                if (ischecked) {
+                    selectInfo.unSelectedValues = $.map(selectInfo.unSelectedValues, function (n) {
+                        return n === v ? null : n;
+                    });
+                } else {
+                    selectInfo.unSelectedValues.push(v);
+                }
+            }
+            
+            
+            //不是【全选所有】时
+            if (!selectInfo.isCheckAll) {
+                if (ischecked) {
+                    selectInfo.selectedValues.push(v);
+                } else {
+                    selectInfo.selectedValues = $.map(selectInfo.selectedValues, function (n) {
+                        return n === v ? null : n;
+                    });
+                }
+            }
+
+            selectInfo.selectedValues = $.unique(selectInfo.selectedValues.sort());
+            selectInfo.unSelectedValues = $.unique(selectInfo.unSelectedValues.sort());
         };
+        
+        
         /**
-         * 清空事件
-         */
-        var _clearCheck = function () {
-            var $checkItem = $(ops.checkItemClass), $checkAll = $(ops.checkAllClass);
-            $checkItem.prop({ "checked": false });
-            $checkAll.prop({ "checked": false });
-            _setValues();
-        };
-        /**
-         * 反选事件
-         */
-        var _reverseCheck = function () {
-            var $checkItem = $(ops.checkItemClass), $checkAll = $(ops.checkAllClass);
-            $checkItem.each(function () {
-                this.checked = !this.checked;
-            });
-            $checkAll.prop({ "checked": _isAllChecked() });
-            _setValues();
-        };
-        /**
-         * 选择每一项的事件
+         * 【要选择的每一项】事件
          */
         var _checkItem = function () {
-            var $checkAll = $(ops.checkAllClass);
-            $checkAll.prop({ "checked": _isAllChecked() });
-            _setValues();
+            _pushVal(this);
         };
 
-        
-        
-
         /**
-         * 全选事件绑定
+         * 【全选所有】事件
+         */
+        var _checkAll = function () {
+
+            selectInfo.isCheckAll = true;
+            selectInfo.selectedValues = [];
+            selectInfo.unSelectedValues = [];
+
+            _getCheckItem().prop("checked", true);
+            _getCheckAll().prop("checked", true);
+            _getCheckAllCurrent().prop("checked", true);
+
+        };
+        
+        /**
+         * 【全选当页】事件,this为事件源，当this为checked时，当页全选，否则，当页不选。
+         */
+        var _checkAllCurrent = function () {
+            var _t = this, $ck = _getCheckItem();
+            if (isCheckBox(_t)) {
+                $ck.prop({ "checked": _t.checked });
+            } else {
+                $ck.prop({ "checked": true });
+            }
+            $ck.each(function () {
+                _pushVal(this);
+            });
+        };
+        
+        
+        
+        /**
+         * 【清空所有选择】事件
+         */
+        var _clearCheck = function () {
+            selectInfo = new SelectedBaseInfo();
+            _getCheckItem().prop("checked", false);
+            _getCheckAll().prop("checked", false);
+            _getCheckAllCurrent().prop("checked", false);
+        };
+        /**
+         * 【清空当页选择】事件
+         */
+        var _clearCheckCurrent = function () {
+            var $ck = _getCheckItem().prop("checked", false);
+            _getCheckAllCurrent().prop("checked", false);
+            $ck.each(function () {
+                _pushVal(this);
+            });
+        };
+        
+        /**
+         * 【反选当页】事件
+         */
+        var _reverseCheckCurrent = function () {
+            var $ck = _getCheckItem();
+            $ck.each(function () {
+                this.checked = !this.checked;
+            });
+            $ck.each(function () {
+                _pushVal(this);
+            });
+        };
+        
+        /********************************************事件绑定 开始**********************************************************/
+        
+        /**
+         *【要选择的每一项】事件绑定
+         */
+        $body.on("click", ops.checkItemClass, function () {
+            if (ops.beforeCheckItem.call(this) !== false) {
+                _checkItem.call(this);
+            }
+            ops.afterCheckItem.call(this);
+        });
+        /**
+         * 【全选所有】事件绑定
          */
         $body.on("click", ops.checkAllClass, function () {
             if (ops.beforeCheckAll.call(this) !== false) {
@@ -287,7 +364,16 @@
             ops.afterCheckAll.call(this);
         });
         /**
-         * 清空事件绑定
+         * 【全选当页】事件绑定
+         */
+        $body.on("click", ops.checkAllCurrentClass, function () {
+            if (ops.beforeCheckAllCurrent.call(this) !== false) {
+                _checkAllCurrent.call(this);
+            }
+            ops.afterCheckAllCurrent.call(this);
+        });
+        /**
+         * 【清空所有选择】事件绑定
          */
         $body.on("click", ops.clearCheckClass, function () {
             if (ops.beforeClearCheck.call(this) !== false) {
@@ -296,53 +382,34 @@
             ops.afterClearCheck.call(this);
         });
         /**
-         * 反选事件绑定
+         * 【清空当页选择】事件绑定
          */
-        $body.on("click", ops.reverseCheckClass, function () {
-            if (ops.beforeReverseCheck.call(this) !== false) {
-                _reverseCheck.call(this);
+        $body.on("click", ops.clearCheckCurrentClass, function () {
+            if (ops.beforeClearCheckCurrent.call(this) !== false) {
+                _clearCheckCurrent.call(this);
             }
-            ops.afterReverseCheck.call(this);
+            ops.afterClearCheckCurrent.call(this);
         });
         /**
-         * 选择每一项的事件绑定
+         * 【反选当页】事件绑定
          */
-        $body.on("click", ops.checkItemClass, function () {
-            if (ops.beforeCheckItem.call(this) !== false) {
-                _checkItem.call(this);
+        $body.on("click", ops.reverseCheckCurrentClass, function () {
+            if (ops.beforeReverseCheckCurrent.call(this) !== false) {
+                _reverseCheckCurrent.call(this);
             }
-            ops.afterCheckItem.call(this);
-        });
+            ops.afterReverseCheckCurrent.call(this);
+        });        
+        
+        
+        
+        
         
 
 
         /**
          * 公开方法
          */
-        return {
-            /**
-             * 全选回调函数
-             */
-            checkAll: _checkAll,
-            /**
-             * 清空选择回调函数
-             */
-            clearCheck: _clearCheck,
-            /**
-             * 反选回调函数
-             */
-            reverseCheck: _reverseCheck,
-            /**
-             * 获取到当前已选项的value
-             */
-            getValues: _getValues,
-            /**
-             * 初始化选中项
-             */
-            setValues: function (values) {
-
-            }
-        };
+        return {};
 
     };
 
