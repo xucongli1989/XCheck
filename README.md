@@ -215,5 +215,7 @@ isKeep==true时存放结果的**SelectedBaseInfo**对象：
 
 # Demo
 [http://htmlpreview.github.io/?https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/demo.html](http://htmlpreview.github.io/?https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/demo.html)
+
+注：在线预览可能会不准确，请参考源码XCheck/demo.html
 # 预览图
 ![](https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/Imgs/1.jpg)
