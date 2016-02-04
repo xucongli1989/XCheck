@@ -10,7 +10,7 @@
  *                      需要引用jquery，$.XCheck({option});
  ********************************************************************************************
  * 当前版本：v1.0.0
- * 更新时间：2016-01-24
+ * 更新时间：2016-02-04
  */
 ; (function (window, $, undefined) {
    
@@ -205,31 +205,96 @@
             return $(ops.checkAllCurrentClass);
         };
         //获取或设置已选结果值
-        var _getOrSetValue = function (v) {
+        var _val = function (v) {
             var $val = $(ops.valueClass);
-            if (!v) {
+            if (arguments.length === 0) {
                 return ops.isKeep ? JSON.parse($val.attr(ops.valueAttr) || null) : $val.attr(ops.valueAttr);
             }
-            if (ops.isKeep && isObject(v)) {
+            if (ops.isKeep) {
+                if (!isObject(v)) {
+                    throw "the v must be a SelectedBaseInfo object!";
+                }
                 $val.attr(ops.valueAttr, JSON.stringify(v));
             } else {
+                if (!isString(v || "")) {
+                    throw "the v must be a string!";
+                }
                 $val.attr(ops.valueAttr, v);
             }
         };
-        
-       
+        /**
+         * 根据指定的结果值，初始化插件状态
+         */
+        var _initVal = function (v) {
+
+            if (!v) {
+                return;
+            }
+
+            var $checkItem = _getCheckItem(), $checkAll = _getCheckAll(), $checkAllCurrent = _getCheckAllCurrent();
+            var filterStr = [];
+            var arr = [];
+            //设置值
+            _val(v);
+            //初始化checkbox选中状态
+            if (ops.isKeep) {
+
+                $checkItem.prop("checked", v.isCheckAll);
+                $checkAll.prop("checked", v.isCheckAll);
+                $checkAllCurrent.prop("checked", v.isCheckAll);
+
+                if (v.isCheckAll) {
+
+                    if (v.unSelectedValues.length > 0) {
+                        filterStr = [];
+                        $.each(v.unSelectedValues, function (idx, n) {
+                            filterStr.push("[value='" + n + "']");
+                        });
+                        $checkItem.filter(filterStr.join(',')).prop("checked", false);
+                    }
+
+                }
+
+                if (!v.isCheckAll) {
+
+                    if (v.selectedValues.length > 0) {
+                        filterStr = [];
+                        $.each(v.selectedValues, function (idx, n) {
+                            filterStr.push("[value='" + n + "']");
+                        });
+                        $checkItem.filter(filterStr.join(',')).prop("checked", true);
+                    }
+
+                }
+
+
+            }
+
+            if (!ops.isKeep) {
+                arr = v.split(',');
+                if (arr.length > 0) {
+                    filterStr = [];
+                    $.each(arr, function (idx, n) {
+                        filterStr.push("[value='" + n + "']");
+                    });
+                    $checkItem.filter(filterStr.join(',')).prop("checked", true);
+                }
+
+            }
+
+            _getCheckAllCurrent().prop({ "checked": $checkItem.not(":checked").length === 0 });
+
+        };
         
         
         /****************************************事件处理  begin******************************************/
 
         /**
-         * 保存选中值到最终的结果中
+         * 根据checkbox对象，将其选中状态更新到结果值中
          */
         var _pushVal = function (obj) {
 
             var ischecked = obj.checked, v = obj.value;
-            var $ckItems = _getCheckItem(), $ckCheckAllCurrent = _getCheckAllCurrent();
-
 
             if (ops.isKeep) {
                 //【全选所有】时
@@ -242,7 +307,6 @@
                         selectInfo.unSelectedValues.push(v);
                     }
                 }
-            
             
                 //不是【全选所有】时
                 if (!selectInfo.isCheckAll) {
@@ -258,7 +322,7 @@
                 selectInfo.selectedValues = $.unique(selectInfo.selectedValues.sort());
                 selectInfo.unSelectedValues = $.unique(selectInfo.unSelectedValues.sort());
 
-                _getOrSetValue(selectInfo);
+                _val(selectInfo);
             } else {
 
                 if (ischecked) {
@@ -271,11 +335,8 @@
 
                 selectVal = $.unique(selectVal.sort());
 
-                _getOrSetValue(selectVal);
+                _val(selectVal.join(','));
             }
-            
-            //设置【全选当页】checkbox的全中状态
-            $ckCheckAllCurrent.prop({ "checked": $ckItems.not(":checked").length == 0 });
 
         };
         
@@ -284,6 +345,9 @@
          * 【要选择的每一项】事件，this为checkbox
          */
         var _checkItem = function () {
+
+            _getCheckAllCurrent().prop({ "checked": _getCheckItem().not(":checked").length == 0 });
+
             _pushVal(this);
         };
 
@@ -292,12 +356,17 @@
          */
         var _checkAll = function () {
 
+            if (!ops.isKeep) {
+                throw "call [checkAll] method,must be set 'isKeep' value is true!";
+            }
+
             selectInfo.isCheckAll = true;
             selectInfo.selectedValues = [];
             selectInfo.unSelectedValues = [];
 
             _getCheckItem().prop("checked", true);
             _getCheckAll().prop("checked", true);
+            _getCheckAllCurrent().prop({ "checked": true });
 
             if (isCheckBox(this)) {
                 _pushVal(this);
@@ -329,9 +398,15 @@
          * 【清空所有选择】事件，this为事件源
          */
         var _clearCheck = function () {
+
+            if (!ops.isKeep) {
+                throw "call [clearCheck] method,must be set 'isKeep' value is true!";
+            }
+
             selectInfo = new SelectedBaseInfo();
             _getCheckItem().prop("checked", false);
             _getCheckAll().prop("checked", false);
+            _getCheckAllCurrent().prop({ "checked": false });
             _pushVal({});
         };
         /**
@@ -339,6 +414,7 @@
          */
         var _clearCheckCurrent = function () {
             var $ck = _getCheckItem().prop("checked", false);
+            _getCheckAllCurrent().prop({ "checked": false });
             $ck.each(function () {
                 _pushVal(this);
             });
@@ -352,6 +428,7 @@
             $ck.each(function () {
                 this.checked = !this.checked;
             });
+            _getCheckAllCurrent().prop({ "checked": $ck.not(":checked").length == 0 });
             $ck.each(function () {
                 _pushVal(this);
             });
@@ -427,7 +504,11 @@
             /**
              * 获取或设置结果值
              */
-            getOrSetValue: _getOrSetValue
+            val: _val,
+            /**
+             * 根据指定的结果值，初始化插件状态
+             */
+            initVal: _initVal
         };
 
     };
