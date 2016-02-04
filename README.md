@@ -168,6 +168,26 @@ XCheck为checkbox 全选/反选功能的 jquery插件，支持多页情况下保
 
 ----------
 
+公开方法
+<table>
+<tr>
+<td>名称</td>
+<td>说明</td>
+</tr>
+<tr>
+<td>$.XCheck({...}).val(...)</td>
+<td>获取或设置结果值</td>
+</tr>
+<tr>
+<td>$.XCheck({...}).initVal(...)</td>
+<td>根据指定的结果值，初始化插件状态</td>
+</tr>
+</table>
+
+
+----------
+
+
 
 isKeep==true时存放结果的**SelectedBaseInfo**对象：
 
