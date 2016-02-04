@@ -3,14 +3,6 @@ XCheck为checkbox 全选/反选功能的 jquery插件，支持多页情况下保
 # 如何使用
 - 引用jquery.js
 - 引用XCheck.js
-# 初始化
-    <script type="text/javascript">
-        $(function(){
-            $.XCheck({
-                groupClass:".xcheckgroup"
-            });
-        });
-    </script>
 
 # 属性及方法
 
