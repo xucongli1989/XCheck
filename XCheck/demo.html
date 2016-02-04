@@ -10,47 +10,63 @@
 <body>
 
 
+    <input style="width:600px;height:100px;" class="xcheckgroup xcheckValue" />
 
-    <table>
+    <div>
+        <input type="button" class="xcheckgroup checkAll" value="全选所有" />
+        <input type="button" class="xcheckgroup clearCheck" value="清空所有" />
+        <input type="button" class="xcheckgroup reverseCheckCurrent" value="反选当页" />
+        <input type="button" class="xcheckgroup clearCheckCurrent" value="清空当页" />
+    </div>
+
+    <table style="width:100%;">
 
         <tr>
-            <td>
-                全选<input type="checkbox" class="xcheckgroup checkAll" /> <br/>
-                <input type="button" class="xcheckgroup reverseCheck" value="反选" /> <br/>
-                <input type="button" class="xcheckgroup clearCheck" value="清空" />
+            <td width="5%">
+                序号
+            </td>
+            <td width="95%">
+                <label>
+                    <input type="checkbox" class="xcheckgroup checkAllCurrent" />全选当页
+                </label>
             </td>
         </tr>
         <tr>
+            <td>1</td>
             <td>
-                <input type="checkbox" class="xcheckgroup checkItem" />
-
-            </td>
-
-        </tr>
-        <tr>
-            <td>
-                <input type="checkbox" class="xcheckgroup checkItem" />
-
-            </td>
-
-        </tr>
-        <tr>
-            <td>
-                <input type="checkbox" class="xcheckgroup checkItem" />
+                <input type="checkbox" class="xcheckgroup checkItem" value="1" />
 
             </td>
 
         </tr>
         <tr>
+            <td>2</td>
             <td>
-                <input type="checkbox" class="xcheckgroup checkItem" />
+                <input type="checkbox" class="xcheckgroup checkItem" value="2" />
 
             </td>
 
         </tr>
         <tr>
+            <td>3</td>
             <td>
-                <input type="checkbox" class="xcheckgroup checkItem" />
+                <input type="checkbox" class="xcheckgroup checkItem" value="3" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" value="4" />
+
+            </td>
+
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>
+                <input type="checkbox" class="xcheckgroup checkItem" value="5" />
 
             </td>
 
@@ -62,6 +78,7 @@
         $(function(){
     
             $.XCheck({
+                isKeep:true,
                 groupClass:".xcheckgroup"
             });
     

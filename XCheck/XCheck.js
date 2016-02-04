@@ -53,7 +53,7 @@
         /**
          * 【存放已选值】的class
          */
-        valueClass: ".checkAll",
+        valueClass: ".xcheckValue",
         /**
          * 【存放已选值】的属性
          */
@@ -188,6 +188,7 @@
 
         var $body = $("body");
 
+        var selectVal = [];
         var selectInfo = new SelectedBaseInfo();
         
         
@@ -216,20 +217,7 @@
             }
         };
         
-        
-
-        /**
-         * 判断是否全选了
-         */
-        var _isAllChecked = function () {
-
-            if (ops.isKeep) {
-                return selectInfo.isCheckAll && selectInfo.unSelectedValues.length === 0;
-            } else {
-                return _getCheckItem().not(":checked").length === 0;
-            }
-
-        };
+       
         
         
         /****************************************事件处理  begin******************************************/
@@ -238,48 +226,69 @@
          * 保存选中值到最终的结果中
          */
         var _pushVal = function (obj) {
-            if (!ops.isKeep) {
-                return;
-            }
-            var ischecked = obj.checked, v = obj.value;
-            
-            //【全选所有】时
-            if (selectInfo.isCheckAll) {
-                if (ischecked) {
-                    selectInfo.unSelectedValues = $.map(selectInfo.unSelectedValues, function (n) {
-                        return n === v ? null : n;
-                    });
-                } else {
-                    selectInfo.unSelectedValues.push(v);
-                }
-            }
-            
-            
-            //不是【全选所有】时
-            if (!selectInfo.isCheckAll) {
-                if (ischecked) {
-                    selectInfo.selectedValues.push(v);
-                } else {
-                    selectInfo.selectedValues = $.map(selectInfo.selectedValues, function (n) {
-                        return n === v ? null : n;
-                    });
-                }
-            }
 
-            selectInfo.selectedValues = $.unique(selectInfo.selectedValues.sort());
-            selectInfo.unSelectedValues = $.unique(selectInfo.unSelectedValues.sort());
+            var ischecked = obj.checked, v = obj.value;
+            var $ckItems = _getCheckItem(), $ckCheckAllCurrent = _getCheckAllCurrent();
+
+
+            if (ops.isKeep) {
+                //【全选所有】时
+                if (selectInfo.isCheckAll) {
+                    if (ischecked) {
+                        selectInfo.unSelectedValues = $.map(selectInfo.unSelectedValues, function (n) {
+                            return n === v ? null : n;
+                        });
+                    } else {
+                        selectInfo.unSelectedValues.push(v);
+                    }
+                }
+            
+            
+                //不是【全选所有】时
+                if (!selectInfo.isCheckAll) {
+                    if (ischecked) {
+                        selectInfo.selectedValues.push(v);
+                    } else {
+                        selectInfo.selectedValues = $.map(selectInfo.selectedValues, function (n) {
+                            return n === v ? null : n;
+                        });
+                    }
+                }
+
+                selectInfo.selectedValues = $.unique(selectInfo.selectedValues.sort());
+                selectInfo.unSelectedValues = $.unique(selectInfo.unSelectedValues.sort());
+
+                _getOrSetValue(selectInfo);
+            } else {
+
+                if (ischecked) {
+                    selectVal.push(v);
+                } else {
+                    selectVal = $.map(selectVal, function (n) {
+                        return n === v ? null : n;
+                    });
+                }
+
+                selectVal = $.unique(selectVal.sort());
+
+                _getOrSetValue(selectVal);
+            }
+            
+            //设置【全选当页】checkbox的全中状态
+            $ckCheckAllCurrent.prop({ "checked": $ckItems.not(":checked").length == 0 });
+
         };
         
         
         /**
-         * 【要选择的每一项】事件
+         * 【要选择的每一项】事件，this为checkbox
          */
         var _checkItem = function () {
             _pushVal(this);
         };
 
         /**
-         * 【全选所有】事件
+         * 【全选所有】事件，this可以为checkbox或其它
          */
         var _checkAll = function () {
 
@@ -289,8 +298,14 @@
 
             _getCheckItem().prop("checked", true);
             _getCheckAll().prop("checked", true);
-            _getCheckAllCurrent().prop("checked", true);
 
+            if (isCheckBox(this)) {
+                _pushVal(this);
+            } else {
+                _pushVal({
+                    checked: true
+                });
+            }
         };
         
         /**
@@ -311,27 +326,26 @@
         
         
         /**
-         * 【清空所有选择】事件
+         * 【清空所有选择】事件，this为事件源
          */
         var _clearCheck = function () {
             selectInfo = new SelectedBaseInfo();
             _getCheckItem().prop("checked", false);
             _getCheckAll().prop("checked", false);
-            _getCheckAllCurrent().prop("checked", false);
+            _pushVal({});
         };
         /**
-         * 【清空当页选择】事件
+         * 【清空当页选择】事件，this为事件源
          */
         var _clearCheckCurrent = function () {
             var $ck = _getCheckItem().prop("checked", false);
-            _getCheckAllCurrent().prop("checked", false);
             $ck.each(function () {
                 _pushVal(this);
             });
         };
         
         /**
-         * 【反选当页】事件
+         * 【反选当页】事件，this为事件源
          */
         var _reverseCheckCurrent = function () {
             var $ck = _getCheckItem();
@@ -398,7 +412,7 @@
                 _reverseCheckCurrent.call(this);
             }
             ops.afterReverseCheckCurrent.call(this);
-        });        
+        });
         
         
         
@@ -409,7 +423,12 @@
         /**
          * 公开方法
          */
-        return {};
+        return {
+            /**
+             * 获取或设置结果值
+             */
+            getOrSetValue: _getOrSetValue
+        };
 
     };
 
