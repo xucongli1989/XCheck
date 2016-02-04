@@ -202,5 +202,6 @@ isKeep==true时存放结果的**SelectedBaseInfo**对象：
 3. 如果没有点【全部选择】，则每次已选项的值都会存入已选项中
 
 # Demo
-
+[http://htmlpreview.github.io/?https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/demo.html](http://htmlpreview.github.io/?https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/demo.html)
 # 预览图
+![](https://raw.githubusercontent.com/xucongli1989/XCheck/master/XCheck/Imgs/1.jpg)
