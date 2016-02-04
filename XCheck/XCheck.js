@@ -13,8 +13,8 @@
  * 更新时间：2016-02-04
  */
 ; (function (window, $, undefined) {
-   
-   "use strict";
+
+    "use strict";
    
     /**
      * 默认选项
@@ -143,6 +143,11 @@
         /**
          * 未选择项的值
          */
+        this.unSelectedValues = [];
+    };
+    SelectedBaseInfo.prototype.reset = function () {
+        this.isCheckAll = false;
+        this.selectedValues = [];
         this.unSelectedValues = [];
     };
     
@@ -405,7 +410,7 @@
                 throw "call [clearCheck] method,must be set 'isKeep' value is true!";
             }
 
-            selectInfo = new SelectedBaseInfo();
+            selectInfo.reset();
             _getCheckItem().prop("checked", false);
             _getCheckAll().prop("checked", false);
             _getCheckAllCurrent().prop({ "checked": false });
