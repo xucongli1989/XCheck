@@ -37,7 +37,11 @@
         </div>
     </fieldset>
 
-<br/><br/><br/><br/><br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
 
     <fieldset>
         <legend style="color:#f00;">场景二（多页情况下保持选择时）：</legend>
@@ -112,42 +116,6 @@
 
 
 
-    <script type="text/javascript">
-        $(function(){
-            //场景一（多页情况下保持选择时）
-            var xcheck1= $.XCheck({
-                isKeep:true,
-                groupClass:".xcheckgroup1"
-            });
-            
-            var page=function(start){
-                start=(parseInt(start) || 1);
-                var html=template("group1PageTemp",{start:start});
-                $("#group1Page").html(html);
-                console.log(xcheck1.val());
-            };
-            page();
-            
-           $("body").on("click",".pageBtn a",function(){
-                page($(this).attr("rel"));
-                xcheck1.initVal(xcheck1.val());
-                return false;
-           });
-            
-            
-            
-            
-            //场景二（多页情况下保持选择时）
-            $.XCheck({
-                groupClass:".xcheckgroup2"
-            });
-    
-        });
-    </script>
-
-
-
-
     <script type="text/html" id="group1PageTemp">
 
 
@@ -207,6 +175,81 @@
 
 
     </script>
+
+
+
+
+    <script type="text/javascript">
+        $(function(){
+            //场景一（多页情况下保持选择时）
+            var xcheck1= $.XCheck({
+                isKeep:true,
+                groupClass:".xcheckgroup1",
+                beforeCheckAll:function(){
+                    console.log("beforeCheckAll");
+                },
+                afterCheckAll:function(){
+                    console.log("afterCheckAll");
+                },
+                beforeCheckAllCurrent:function(){
+                    console.log("beforeCheckAllCurrent");
+                },
+                afterCheckAllCurrent:function(){
+                    console.log("afterCheckAllCurrent");
+                },
+                beforeCheckItem:function(){
+                    console.log("beforeCheckItem");
+                },
+                afterCheckItem:function(){
+                    console.log("afterCheckItem");
+                },
+                beforeClearCheck:function(){
+                    console.log("beforeClearCheck");
+                },
+                afterClearCheck:function(){
+                    console.log("afterClearCheck");
+                },
+                beforeClearCheckCurrent:function(){
+                    console.log("beforeClearCheckCurrent");
+                },
+                afterClearCheckCurrent:function(){
+                    console.log("afterClearCheckCurrent");
+                },
+                beforeReverseCheckCurrent:function(){
+                    console.log("beforeReverseCheckCurrent");
+                },
+                afterReverseCheckCurrent:function(){
+                    console.log("afterReverseCheckCurrent");
+                }
+            });
+            
+            var page=function(start){
+                start=(parseInt(start) || 1);
+                var html=template("group1PageTemp",{start:start});
+                $("#group1Page").html(html);
+            };
+            page();
+            
+           $("body").on("click",".pageBtn a",function(){
+                page($(this).attr("rel"));
+                xcheck1.initVal(xcheck1.val());
+                return false;
+           });
+            
+            
+            
+            
+            //场景二（普通选择的情况，也就是只有单页选择）
+            $.XCheck({
+                groupClass:".xcheckgroup2"
+            });
+    
+        });
+    </script>
+
+
+
+
 
 
 

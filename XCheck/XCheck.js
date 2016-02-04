@@ -14,6 +14,8 @@
  */
 ; (function (window, $, undefined) {
    
+   "use strict";
+   
     /**
      * 默认选项
      */
