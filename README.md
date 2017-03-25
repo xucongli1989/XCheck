@@ -174,6 +174,10 @@ XCheck为checkbox 全选/反选功能的 jquery插件，支持多页情况下保
 <td>$.XCheck({...}).initVal(...)</td>
 <td>根据指定的结果值，初始化插件状态</td>
 </tr>
+<tr>
+<td>$.XCheck({...}).options</td>
+<td>获取当前的options</td>
+</tr>
 </table>
 
 

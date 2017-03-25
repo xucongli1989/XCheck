@@ -9,8 +9,8 @@
  *                      本插件支持单页及多页的全选、反选、清空选择
  *                      需要引用jquery，$.XCheck({option});
  ********************************************************************************************
- * 当前版本：v1.0.0
- * 更新时间：2016-02-04
+ * 当前版本：v1.1
+ * 更新时间：2017-03-25
  */
 ; (function (window, $, undefined) {
 
@@ -192,11 +192,12 @@
         ops.clearCheckCurrentClass += ops.groupClass;
         ops.reverseCheckCurrentClass += ops.groupClass;
         ops.valueClass += ops.groupClass;
+        ops.selectInfo=new SelectedBaseInfo();
 
         var $body = $("body");
 
         var selectVal = [];
-        var selectInfo = new SelectedBaseInfo();
+        var selectInfo = ops.selectInfo;
         
         
         //获取所有【要选择的每一项】的jquery对象
@@ -515,7 +516,11 @@
             /**
              * 根据指定的结果值，初始化插件状态
              */
-            initVal: _initVal
+            initVal: _initVal,
+            /**
+             * 当前选项options
+             */
+            options:ops
         };
 
     };

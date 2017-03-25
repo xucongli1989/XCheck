@@ -201,6 +201,8 @@
                     console.log("beforeCheckItem");
                 },
                 afterCheckItem:function(){
+                    var ops=xcheck1.options;
+                    console.log('当前的options为：'+JSON.stringify(ops));
                     console.log("afterCheckItem");
                 },
                 beforeClearCheck:function(){
